@@ -39,6 +39,7 @@ SessionManager::SessionManager()
 
   this->m_CurrentReadIndex = 0;
   this->m_HeaderDeserialized = 0;
+  this->m_ServerTimeout = 0;
 }
 
 
@@ -103,6 +104,10 @@ int SessionManager::Connect()
       //clientSocket->SetReceiveTimeout(0);
       this->m_Socket = clientSocket;
       }
+	else
+	  {
+	  return 0;
+	  }
     }
   else
     {
@@ -117,7 +122,7 @@ int SessionManager::Connect()
     if (serverSocket.IsNotNull())
       {
       //this->ServerSocket->CreateServer(this->m_Port);
-      this->m_Socket = serverSocket->WaitForConnection(10000);
+      this->m_Socket = serverSocket->WaitForConnection(m_ServerTimeout);
       }
     
     if (this->m_Socket.IsNotNull() && this->m_Socket->GetConnected()) // if client connected
