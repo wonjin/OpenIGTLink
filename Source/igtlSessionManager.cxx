@@ -39,6 +39,7 @@ SessionManager::SessionManager()
 
   this->m_CurrentReadIndex = 0;
   this->m_HeaderDeserialized = 0;
+  this->m_ServerTimeout = 0;
 }
 
 
@@ -103,6 +104,10 @@ int SessionManager::Connect()
       //clientSocket->SetReceiveTimeout(0);
       this->m_Socket = clientSocket;
       }
+	else
+	  {
+	  return 0;
+	  }
     }
   else
     {

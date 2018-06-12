@@ -65,6 +65,10 @@ class IGTLCommon_EXPORT SessionManager: public Object
   int            ProcessMessage();
   int            PushMessage(MessageBase*);
 
+  // Description:
+  // Set the timeout of socket
+  void           SetServerTimeout(int timeout) { m_ServerTimeout = timeout; }
+
  protected:
   SessionManager();
   ~SessionManager();
@@ -74,6 +78,7 @@ class IGTLCommon_EXPORT SessionManager: public Object
   std::string    m_Hostname;
   int            m_Port;
   int            m_Mode;
+  int            m_ServerTimeout;
 
   // Description:
   // m_CurrentReadIndex is used to save the current position of the message.
