@@ -26,6 +26,7 @@
 
 =========================================================================*/
 #include "igtlClientSocket.h"
+#include <winsock.h>
 
 namespace igtl
 {
@@ -66,6 +67,66 @@ int ClientSocket::ConnectToServer(const char* hostName, int port)
     return -1;
     }
   return 0;
+}
+
+//-----------------------------------------------------------------------------
+int ClientSocket::ConnectToServer(const char* hostName, int port, int msec)
+{
+	if (this->m_SocketDescriptor != -1)
+	{
+		igtlWarningMacro("Client connection already exists. Closing it.");
+		this->CloseSocket(this->m_SocketDescriptor);
+		this->m_SocketDescriptor = -1;
+	}
+
+	this->m_SocketDescriptor = this->CreateSocket();
+	if (!this->m_SocketDescriptor)
+	{
+		igtlErrorMacro("Failed to create socket.");
+		return -1;
+	}
+
+	/// Set the socket to the NON BLOCKING SOCKET
+	unsigned long nonBlocking = 1;
+
+	if (ioctlsocket(this->m_SocketDescriptor, FIONBIO, &nonBlocking) != 0)
+	{
+		igtlErrorMacro("Failed to set the socket to the non-blocking socket " << hostName << ":" << port);
+		return -1;
+	}
+
+	this->Connect(this->m_SocketDescriptor, hostName, port);
+	int ret = this->SelectSocket(this->m_SocketDescriptor, msec);
+	if (ret == 0)
+	{
+		// Timed out.
+		igtlErrorMacro("Connection timeout: msec <= " << msec);
+		return -1;
+	}
+	if (ret == -1)
+	{
+		igtlErrorMacro("Error selecting socket.");
+		return -1;
+	}
+
+	int error;
+	int len = sizeof(error);
+	getsockopt(m_SocketDescriptor, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+	if(error)
+	{
+		igtlErrorMacro("NonBlocking: Error checking to connection. Failed to connection");
+		return -1;
+	}
+	
+	/// Set the socket back to the BLOCKING SOCKET
+	nonBlocking = 0;
+	if (ioctlsocket(this->m_SocketDescriptor, FIONBIO, &nonBlocking) != 0)
+	{
+		igtlErrorMacro("Failed to set the socket back to the blocking socket " << hostName << ":" << port);
+		return -1;
+	}
+
+	return 0;
 }
 
 //-----------------------------------------------------------------------------

@@ -39,7 +39,8 @@ SessionManager::SessionManager()
 
   this->m_CurrentReadIndex = 0;
   this->m_HeaderDeserialized = 0;
-  this->m_ServerTimeout = 0;
+  this->m_ServerTimeout = 1000;
+  this->m_ClientTimeout = 1000;
 }
 
 
@@ -98,7 +99,7 @@ int SessionManager::Connect()
       return 0;
       }
     //this->m_Socket->SetConnectTimeout(1000);
-    int r = clientSocket->ConnectToServer(this->m_Hostname.c_str(), this->m_Port);
+    int r = clientSocket->ConnectToServer(this->m_Hostname.c_str(), this->m_Port, m_ClientTimeout);
     if (r == 0) // if connected to server
       {
       //clientSocket->SetReceiveTimeout(0);
